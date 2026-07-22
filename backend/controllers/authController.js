@@ -170,25 +170,78 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+// GET /api/auth/test-email?to=your_email@gmail.com
+exports.testEmail = async (req, res) => {
+  try {
+    const to = req.query.to || process.env.SMTP_USER;
+    if (!to) {
+      return res.status(400).json({ message: "Provide a ?to=email query parameter to test sending email." });
+    }
+
+    const { sendMail } = require("../config/mailer");
+    const result = await sendMail({
+      to,
+      subject: "SkSync SMTP Diagnostic Test Email",
+      html: `<h2>SkSync SMTP Test Successful</h2><p>This email confirms that your Render SMTP configuration is working perfectly.</p>`
+    });
+
+    if (result && result.error) {
+      return res.status(500).json({
+        success: false,
+        message: `Gmail SMTP error: ${result.error}`,
+        smtpConfigured: Boolean(process.env.SMTP_HOST),
+        smtpUser: process.env.SMTP_USER || "NOT SET"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Test email sent successfully to ${to}. Check your inbox/spam folder!`,
+      details: result
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 // POST /api/auth/resend-verification  { email }
 exports.resendVerification = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email: (email || "").toLowerCase() });
 
-    const genericResponse = { message: "If an account exists for that email, a new verification link has been sent." };
+    if (!user) {
+      return res.json({ message: "If an account exists for that email, a new verification link has been sent." });
+    }
 
-    if (!user || user.isEmailVerified) return res.json(genericResponse);
+    if (user.isEmailVerified) {
+      return res.json({ message: "Your email is already verified. You can log in directly." });
+    }
 
     const rawToken = generateRawToken();
     user.emailVerificationTokenHash = hashValue(rawToken);
     user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS);
     await user.save();
 
+    let emailSent = false;
+    let mailError = null;
     if (process.env.SMTP_HOST) {
-      await sendVerificationEmail(user, rawToken);
+      const mailResult = await sendVerificationEmail(user, rawToken);
+      if (mailResult && !mailResult.error && !mailResult.skipped) {
+        emailSent = true;
+      } else if (mailResult && mailResult.error) {
+        mailError = mailResult.error;
+      }
     }
-    res.json(genericResponse);
+
+    if (!emailSent && mailError) {
+      return res.status(500).json({
+        message: `Could not send verification email: ${mailError}`,
+        error: mailError
+      });
+    }
+
+    res.json({ message: "Verification link sent! Please check your email inbox (and spam folder)." });
   } catch (err) {
     res.status(500).json({ message: "Could not resend verification email.", error: err.message });
   }
@@ -231,14 +284,27 @@ exports.login = async (req, res) => {
     const hasSmtp = Boolean(process.env.SMTP_HOST);
     if (!user.isEmailVerified) {
       if (hasSmtp && process.env.AUTO_VERIFY !== "true") {
-        return res.status(403).json({
-          message: "Please verify your email before logging in.",
-          code: "EMAIL_NOT_VERIFIED"
-        });
+        const rawToken = generateRawToken();
+        user.emailVerificationTokenHash = hashValue(rawToken);
+        user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS);
+        await user.save();
+
+        const mailResult = await sendVerificationEmail(user, rawToken);
+
+        if (mailResult && mailResult.error) {
+          console.warn(`[login] Verification mail send failed for ${user.email}: ${mailResult.error}. Auto-verifying as fallback.`);
+          user.isEmailVerified = true;
+          await user.save();
+        } else {
+          return res.status(403).json({
+            message: "Please verify your email before logging in. A new verification link has been sent to your email inbox.",
+            code: "EMAIL_NOT_VERIFIED"
+          });
+        }
+      } else {
+        user.isEmailVerified = true;
+        await user.save();
       }
-      // If SMTP is not configured or AUTO_VERIFY=true, auto-verify account
-      user.isEmailVerified = true;
-      await user.save();
     }
 
     const otp = generateOtp();

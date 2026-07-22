@@ -8,6 +8,7 @@ const router = express.Router();
 router.post("/signup", authLimiter, auth.signup);
 router.get("/verify-email/:token", auth.verifyEmail);
 router.post("/resend-verification", authLimiter, auth.resendVerification);
+router.get("/test-email", auth.testEmail);
 
 router.post("/login", authLimiter, auth.login);
 router.post("/verify-otp", otpLimiter, auth.verifyOtp);
