@@ -124,12 +124,20 @@ exports.signup = async (req, res) => {
       emailVerificationExpires: new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS)
     });
 
+    let emailSent = false;
     if (hasSmtp) {
-      await sendVerificationEmail(user, rawToken);
+      const mailResult = await sendVerificationEmail(user, rawToken);
+      if (mailResult && !mailResult.error && !mailResult.skipped) {
+        emailSent = true;
+      } else {
+        console.warn(`[signup] Email send skipped or failed for ${user.email}. Auto-verifying user account as fallback.`);
+        user.isEmailVerified = true;
+        await user.save();
+      }
     }
 
     res.status(201).json({
-      message: autoVerify
+      message: (autoVerify || !emailSent)
         ? "Account created successfully. You can now log in."
         : "Account created. Please check your email to verify your account before logging in."
     });
