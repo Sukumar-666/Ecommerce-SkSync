@@ -1,29 +1,28 @@
 const nodemailer = require("nodemailer");
 
-// Works with any SMTP provider (Gmail app password, SendGrid, Mailgun, SES SMTP, etc).
-// Fill these in backend/.env — see .env.example for the exact variable names.
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: Number(process.env.SMTP_PORT) === 465, // true for port 465, false for 587/25
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
-
 async function sendMail({ to, subject, html }) {
-  if (!process.env.SMTP_HOST) {
-    // Fail loudly in dev instead of silently pretending an email was sent.
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, "") : "";
+
+  if (!host || !user || !pass) {
     console.warn(
-      `[mailer] SMTP is not configured — would have sent "${subject}" to ${to}. ` +
-        "Set SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS in backend/.env to actually send email."
+      `[mailer] SMTP credentials incomplete (host: ${!!host}, user: ${!!user}, pass: ${!!pass}). ` +
+        "Ensure SMTP_HOST, SMTP_USER, and SMTP_PASS are all set in environment variables."
     );
     return { skipped: true };
   }
 
+  const port = Number(process.env.SMTP_PORT) || 587;
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass }
+  });
+
   return transporter.sendMail({
-    from: process.env.SMTP_FROM || `"SkSync Cosmetics" <${process.env.SMTP_USER}>`,
+    from: process.env.SMTP_FROM || `"SkSync Cosmetics" <${user}>`,
     to,
     subject,
     html
@@ -31,3 +30,4 @@ async function sendMail({ to, subject, html }) {
 }
 
 module.exports = { sendMail };
+
