@@ -13,23 +13,24 @@ async function sendMail({ to, subject, html }) {
     return { skipped: true };
   }
 
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const transporterOptions = host.includes("gmail")
-    ? {
-        service: "gmail",
-        auth: { user, pass }
-      }
-    : {
-        host,
-        port,
-        secure: port === 465,
-        auth: { user, pass }
-      };
+  const isGmail = host.includes("gmail");
+  const port = isGmail ? 465 : (Number(process.env.SMTP_PORT) || 587);
+  const secure = isGmail || port === 465;
+
+  const transporterOptions = {
+    host: isGmail ? "smtp.gmail.com" : host,
+    port,
+    secure,
+    auth: { user, pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
+  };
 
   const transporter = nodemailer.createTransport(transporterOptions);
 
   // Gmail SMTP strictly requires the FROM email to match the authenticated SMTP_USER address
-  const fromAddress = (host.includes("gmail"))
+  const fromAddress = isGmail
     ? `"SkSync Cosmetics" <${user}>`
     : (process.env.SMTP_FROM || `"SkSync Cosmetics" <${user}>`);
 
