@@ -8,7 +8,7 @@
 // back into a fresh access token, so the user doesn't have to log in again
 // just because they refreshed the page.
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://sksync-backend.onrender.com/api";
 
 let accessToken = null;
 export function getAccessToken() {
