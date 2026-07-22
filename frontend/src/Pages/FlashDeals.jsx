@@ -96,7 +96,7 @@ export default function FlashDeals() {
   return (
     <Container maxWidth="xl" sx={{ py: 6 }}>
       <PageHeading
-        title="Flipkart & Amazon Style Mega Deal Zone"
+        title="Mega Deal Zone"
         subtitle="Exclusive daily discounts, flash sales, and bank cashback offers on men's grooming & cosmetics."
       />
 
