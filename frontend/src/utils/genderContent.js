@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 export const GENDER_CONTENT = {
   male: {
     label: "Men",
-    heroTagline: "High-Performance Grooming & Skincare Engineered For Men.",
+    heroTagline: "SkSync Cosmetics",
     categories: ["Skincare", "Beard & Shave", "Haircare & Styling", "Luxury Fragrances"],
     heroSlides: [
       {

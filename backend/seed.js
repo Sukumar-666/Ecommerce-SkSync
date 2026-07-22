@@ -31,6 +31,10 @@ async function seed() {
     console.log(`Admin account created: ${adminEmail} / Admin@123 (verified admin)`);
   }
 
+  try {
+    await Product.collection.dropIndex("slug_1");
+  } catch {}
+
   const productCount = await Product.countDocuments();
   if (productCount === 0) {
     await Product.insertMany([

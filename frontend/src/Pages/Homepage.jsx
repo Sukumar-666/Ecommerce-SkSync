@@ -325,16 +325,20 @@ export default function Homepage() {
             }}
           />
           <Typography
-            variant="h2"
+            variant="h1"
             sx={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontWeight: 800,
-              fontSize: { xs: "1.6rem", sm: "2.3rem", md: "3rem" },
-              lineHeight: 1.22,
-              maxWidth: 680,
+              fontFamily: "'Plus Jakarta Sans', 'Outfit', sans-serif",
+              fontWeight: 900,
+              fontSize: { xs: "2.2rem", sm: "3.4rem", md: "4.4rem" },
+              lineHeight: 1.15,
+              maxWidth: 750,
               mb: { xs: 2, md: 3 },
               px: { xs: 1, sm: 0 },
-              textShadow: "0 2px 14px rgba(0,0,0,0.5)",
+              background: "linear-gradient(135deg, #ffffff 40%, #93c5fd 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.7))",
+              letterSpacing: "-0.02em",
             }}
           >
             {content.heroTagline}
