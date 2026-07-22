@@ -34,7 +34,7 @@ app.use(cookieParser());
 // --- Strip any Mongo operator injection ($gt, $ne, etc.) from user input ---
 app.use(mongoSanitize());
 
-app.get("/api/health", (req, res) => {
+app.get(["/", "/api", "/api/health"], (req, res) => {
   res.json({ status: "ok", message: "SkSync API is running." });
 });
 
@@ -43,7 +43,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 
-app.use("/api", (req, res) => {
+app.use("*", (req, res) => {
   res.status(404).json({ message: "API route not found." });
 });
 
