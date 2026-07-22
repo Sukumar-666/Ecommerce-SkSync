@@ -119,27 +119,13 @@ exports.signup = async (req, res) => {
       password: hashedPassword,
       gender,
       role: "customer",
-      isEmailVerified: autoVerify,
-      emailVerificationTokenHash: hashValue(rawToken),
-      emailVerificationExpires: new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS)
+      isEmailVerified: true,
+      emailVerificationTokenHash: null,
+      emailVerificationExpires: null
     });
 
-    let emailSent = false;
-    if (hasSmtp) {
-      const mailResult = await sendVerificationEmail(user, rawToken);
-      if (mailResult && !mailResult.error && !mailResult.skipped) {
-        emailSent = true;
-      } else {
-        console.warn(`[signup] Email send skipped or failed for ${user.email}. Auto-verifying user account as fallback.`);
-        user.isEmailVerified = true;
-        await user.save();
-      }
-    }
-
     res.status(201).json({
-      message: (autoVerify || !emailSent)
-        ? "Account created successfully. You can now log in."
-        : "Account created. Please check your email to verify your account before logging in."
+      message: "Account created successfully. You can now log in directly with your password."
     });
   } catch (err) {
     res.status(500).json({ message: "Signup failed.", error: err.message });
@@ -214,41 +200,17 @@ exports.resendVerification = async (req, res) => {
       return res.json({ message: "If an account exists for that email, a new verification link has been sent." });
     }
 
-    if (user.isEmailVerified) {
-      return res.json({ message: "Your email is already verified. You can log in directly." });
-    }
-
-    const rawToken = generateRawToken();
-    user.emailVerificationTokenHash = hashValue(rawToken);
-    user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS);
+    user.isEmailVerified = true;
     await user.save();
 
-    let emailSent = false;
-    let mailError = null;
-    if (process.env.SMTP_HOST) {
-      const mailResult = await sendVerificationEmail(user, rawToken);
-      if (mailResult && !mailResult.error && !mailResult.skipped) {
-        emailSent = true;
-      } else if (mailResult && mailResult.error) {
-        mailError = mailResult.error;
-      }
-    }
-
-    if (!emailSent && mailError) {
-      return res.status(500).json({
-        message: `Could not send verification email: ${mailError}`,
-        error: mailError
-      });
-    }
-
-    res.json({ message: "Verification link sent! Please check your email inbox (and spam folder)." });
+    res.json({ message: "Your account is active. You can log in directly." });
   } catch (err) {
     res.status(500).json({ message: "Could not resend verification email.", error: err.message });
   }
 };
 
 // POST /api/auth/login  { email, password, role }
-// Step 1 of 2: verifies credentials, then emails an OTP instead of issuing a session.
+// Password-only direct login — issues session tokens immediately
 exports.login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -270,57 +232,17 @@ exports.login = async (req, res) => {
       return res.status(403).json({ message: `This account is registered as "${user.role}", not "${role}".` });
     }
 
-    // Admins bypass email verification and OTP steps for instant dashboard login
-    if (user.role === "admin") {
-      const accessToken = await issueSessionTokens(res, user, req.headers["user-agent"]);
-      return res.json({
-        message: "Admin login successful.",
-        otpRequired: false,
-        accessToken,
-        user: publicUser(user)
-      });
-    }
-
-    const hasSmtp = Boolean(process.env.SMTP_HOST);
     if (!user.isEmailVerified) {
-      if (hasSmtp && process.env.AUTO_VERIFY !== "true") {
-        const rawToken = generateRawToken();
-        user.emailVerificationTokenHash = hashValue(rawToken);
-        user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS);
-        await user.save();
-
-        const mailResult = await sendVerificationEmail(user, rawToken);
-
-        if (mailResult && mailResult.error) {
-          console.warn(`[login] Verification mail send failed for ${user.email}: ${mailResult.error}. Auto-verifying as fallback.`);
-          user.isEmailVerified = true;
-          await user.save();
-        } else {
-          return res.status(403).json({
-            message: "Please verify your email before logging in. A new verification link has been sent to your email inbox.",
-            code: "EMAIL_NOT_VERIFIED"
-          });
-        }
-      } else {
-        user.isEmailVerified = true;
-        await user.save();
-      }
+      user.isEmailVerified = true;
+      await user.save();
     }
 
-    const otp = generateOtp();
-    user.otpHash = hashValue(otp);
-    user.otpExpires = new Date(Date.now() + OTP_EXPIRES_MS);
-    user.otpAttempts = 0;
-    user.otpLastSentAt = new Date();
-    await user.save();
-
-    await sendOtpEmail(user, otp);
-
-    res.json({
-      message: "A verification code has been generated.",
-      otpRequired: true,
-      pendingToken: signPendingTicket(user),
-      devOtp: otp
+    const accessToken = await issueSessionTokens(res, user, req.headers["user-agent"]);
+    return res.json({
+      message: "Login successful.",
+      otpRequired: false,
+      accessToken,
+      user: publicUser(user)
     });
   } catch (err) {
     res.status(500).json({ message: "Login failed.", error: err.message });

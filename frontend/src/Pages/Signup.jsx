@@ -93,13 +93,13 @@ function Signup() {
       <Box sx={{ minHeight: "calc(100vh - 64px)", bgcolor: "#f9fafb", display: "flex", alignItems: "center", justifyContent: "center", py: 6, px: 2 }}>
         <Box sx={{ width: "100%", maxWidth: 440 }}>
           <Paper sx={{ p: { xs: 3, md: 4.5 }, border: "1px solid #e5e7eb", boxShadow: "0 4px 20px -4px rgba(0,0,0,0.08)", textAlign: "center" }}>
-            <Box sx={{ width: 56, height: 56, borderRadius: "14px", background: "linear-gradient(135deg, #1e40af, #2563eb)", display: "flex", alignItems: "center", justifyContent: "center", mx: "auto", mb: 2.5, fontSize: "1.6rem" }}>✉️</Box>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: "#111827", mb: 1 }}>Check your email</Typography>
+            <Box sx={{ width: 56, height: 56, borderRadius: "14px", background: "linear-gradient(135deg, #1e40af, #2563eb)", display: "flex", alignItems: "center", justifyContent: "center", mx: "auto", mb: 2.5, fontSize: "1.6rem" }}>🎉</Box>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: "#111827", mb: 1 }}>Account Created!</Typography>
             <Typography variant="body2" sx={{ color: "#6b7280", mb: 3, lineHeight: 1.7 }}>
-              We've sent a verification link to <strong>{formData.email}</strong>.<br />Click it to activate your account, then sign in.
+              Your account has been created successfully.<br />You can now sign in directly with your email and password.
             </Typography>
             <Button component={RouterLink} to="/login" variant="contained" size="large" sx={{ bgcolor: "#1e40af", fontWeight: 700, "&:hover": { bgcolor: "#1e3a8a" } }}>
-              Go to Sign In
+              Sign In Now
             </Button>
           </Paper>
         </Box>

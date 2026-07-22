@@ -50,16 +50,9 @@ function Login() {
 
     if (!result.ok) {
       setStatus({ type: "error", message: result.message });
-      if (result.message?.toLowerCase().includes("verify your email")) setNeedsVerification(true);
       return;
     }
-    if (!result.otpRequired) {
-      navigate(result.user?.role === "admin" ? "/admin-dashboard" : "/home", { replace: true });
-      return;
-    }
-    navigate("/verify-otp", {
-      state: { pendingToken: result.pendingToken, email: formData.email, remember: formData.remember, devOtp: result.devOtp },
-    });
+    navigate(result.user?.role === "admin" ? "/admin-dashboard" : "/home", { replace: true });
   };
 
   const handleResendVerification = async () => {
