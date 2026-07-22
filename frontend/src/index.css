@@ -1,0 +1,235 @@
+/* =============================================
+   SkSync Global CSS — Clean, No-overlap Layout
+   ============================================= */
+
+/* Google Fonts import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  margin: 1;
+  padding: 0;
+  background-color: #f8fafc;
+  color: #111827;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+* { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9; }
+
+/* =============================================
+   Page Layout Shell — prevents overlap
+   The <Layout> wraps every page in:
+     display:flex flex-direction:column min-height:100vh
+   The <main> area gets flex:1 so footer is pushed down
+   ============================================= */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* =============================================
+   Scroll Reveal Utility
+   ============================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+  will-change: opacity, transform;
+}
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.reveal-scale.reveal-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* =============================================
+   Hero Carousel
+   ============================================= */
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 1.1s ease, transform 5s ease;
+}
+.hero-slide.hero-slide-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* =============================================
+   Category Horizontal Scroll Strip
+   ============================================= */
+.cat-strip {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 1 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cat-strip::-webkit-scrollbar { display: none; }
+
+.cat-strip-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+.cat-strip-item:hover {
+  transform: translateY(-3px);
+}
+.cat-strip-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #bfdbfe;
+  box-shadow: 0 2px 8px rgba(30,64,175,0.15);
+}
+
+/* =============================================
+   Deal Progress Bar
+   ============================================= */
+.deal-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.deal-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1e40af, #2563eb);
+  border-radius: 999px;
+}
+
+/* =============================================
+   Marquee / Ticker
+   ============================================= */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 22s linear infinite;
+}
+.marquee-track:hover { animation-play-state: paused; }
+
+/* =============================================
+   Float Animation
+   ============================================= */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+.float-anim { animation: floatY 3.5s ease-in-out infinite; }
+
+/* =============================================
+   Page Section Helper
+   ============================================= */
+.section-pad {
+  padding: 64px 0;
+}
+.section-pad-sm {
+  padding: 40px 0;
+}
+
+/* =============================================
+   Card Hover Chip Badge
+   ============================================= */
+.badge-blue {
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 0.72rem;
+  border-radius: 4px;
+  padding: 2px 7px;
+  display: inline-block;
+}
+
+/* Keep legacy teal badge class for backwards compat */
+.badge-teal {
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 0.72rem;
+  border-radius: 4px;
+  padding: 2px 7px;
+  display: inline-block;
+}
+
+/* =============================================
+   Utility text helpers
+   ============================================= */
+.text-blue  { color: #1e40af; }
+.text-teal  { color: #1e40af; } /* keep old class working */
+.text-muted { color: #6b7280; }
+.text-sm    { font-size: 0.875rem; }
+.font-bold  { font-weight: 700; }
+.line-through { text-decoration: line-through; }
+
+/* =============================================
+   Mini Page Footer — used on standalone pages
+   ============================================= */
+.mini-page-footer {
+  text-align: center;
+  padding: 20px 16px 28px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  color: #6b7280;
+  line-height: 0.7;
+}
+.mini-page-footer a {
+  color: #1e40af;
+  font-weight: 600;
+  text-decoration: none;
+  margin: 0 6px;
+}
+.mini-page-footer a:hover {
+  text-decoration: underline;
+}
