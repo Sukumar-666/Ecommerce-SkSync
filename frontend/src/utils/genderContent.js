@@ -10,19 +10,19 @@ export const GENDER_CONTENT = {
     categories: ["Skincare", "Beard & Shave", "Haircare & Styling", "Luxury Fragrances"],
     heroSlides: [
       {
-        image: "https://images.pexels.com/photos/3808904/pexels-photo-3808904.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWpBkPJRMUXUn9O2XuxbwqWNTcP7Oww82s8MQE8mO5Zw&s",
         alt: "Men's Hydrating Facial Care Routine"
       },
       {
-        image: "https://images.pexels.com/photos/8467293/pexels-photo-8467293.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        image: "https://beardo.in/cdn/shop/files/1_2e8a155f-e3e1-4293-bae5-0e556d72f60c.jpg?v=1751457600&width=1920",
         alt: "Beard Grooming & Precision Care"
       },
       {
-        image: "https://images.pexels.com/photos/4210347/pexels-photo-4210347.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        image: "https://rukminim2.flixcart.com/image/480/640/xif0q/face-wash/y/3/x/70-5-in-1-charcoal-facewash-for-men-women-70-g-pack-of-1-signet-original-imaheedafzhxdjhy.jpeg?q=80",
         alt: "SkSync Men Active Charcoal Collection"
       },
       {
-        image: "https://images.pexels.com/photos/3998429/pexels-photo-3998429.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        image: "https://beardo.in/cdn/shop/files/1_5d35c7a9-8e8a-41da-a983-b4f3084ee9c3.jpg?format=webp&quality=80&v=1758276606&width=1076",
         alt: "Post-Workout Men's Energy Refresh"
       }
     ],
@@ -55,7 +55,7 @@ export const GENDER_CONTENT = {
       {
         label: "Grooming Kits",
         subtitle: "All-in-One Travel & Daily Essentials",
-        image: "https://images.pexels.com/photos/3808904/pexels-photo-3808904.jpeg?auto=compress&cs=tinysrgb&w=600"
+        image: "https://beardo.in/cdn/shop/files/1_2e8a155f-e3e1-4293-bae5-0e556d72f60c.jpg?v=1751457600&width=1920"
       }
     ],
     offerBanner: "⚡ BIG BILLION MEN SALE: Up to 40% OFF Men's Skincare & Grooming Kits + Extra 15% OFF with code MENKING15",
