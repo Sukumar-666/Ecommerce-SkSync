@@ -21,13 +21,26 @@ async function sendMail({ to, subject, html }) {
     auth: { user, pass }
   });
 
-  return transporter.sendMail({
-    from: process.env.SMTP_FROM || `"SkSync Cosmetics" <${user}>`,
-    to,
-    subject,
-    html
-  });
+  // Gmail SMTP strictly requires the FROM email to match the authenticated SMTP_USER address
+  const fromAddress = (host.includes("gmail.com"))
+    ? `"SkSync Cosmetics" <${user}>`
+    : (process.env.SMTP_FROM || `"SkSync Cosmetics" <${user}>`);
+
+  try {
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject,
+      html
+    });
+    console.log(`[mailer] Email successfully sent to ${to}. ID: ${info.messageId}`);
+    return info;
+  } catch (err) {
+    console.error(`[mailer] Error sending email to ${to}:`, err);
+    return { error: err.message };
+  }
 }
 
 module.exports = { sendMail };
+
 
