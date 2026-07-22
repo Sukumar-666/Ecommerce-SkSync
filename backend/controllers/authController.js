@@ -317,12 +317,10 @@ exports.login = async (req, res) => {
     await sendOtpEmail(user, otp);
 
     res.json({
-      message: hasSmtp
-        ? "A verification code has been sent to your email."
-        : `SMTP not set. Your OTP code is: ${otp}`,
+      message: "A verification code has been generated.",
       otpRequired: true,
       pendingToken: signPendingTicket(user),
-      ...(hasSmtp ? {} : { devOtp: otp })
+      devOtp: otp
     });
   } catch (err) {
     res.status(500).json({ message: "Login failed.", error: err.message });
@@ -411,7 +409,7 @@ exports.resendOtp = async (req, res) => {
     await user.save();
 
     await sendOtpEmail(user, otp);
-    res.json({ message: "A new code has been sent to your email." });
+    res.json({ message: `New verification code: ${otp}`, devOtp: otp });
   } catch (err) {
     res.status(500).json({ message: "Could not resend code.", error: err.message });
   }

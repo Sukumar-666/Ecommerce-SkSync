@@ -58,7 +58,7 @@ function Login() {
       return;
     }
     navigate("/verify-otp", {
-      state: { pendingToken: result.pendingToken, email: formData.email, remember: formData.remember },
+      state: { pendingToken: result.pendingToken, email: formData.email, remember: formData.remember, devOtp: result.devOtp },
     });
   };
 
@@ -216,5 +216,4 @@ function Login() {
   </Container>
   );
 }
-
 export default Login;

@@ -11,9 +11,11 @@ export default function OtpVerification() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { pendingToken, email } = location.state || {};
-  const [otp, setOtp] = useState("");
-  const [status, setStatus] = useState(null);
+  const { pendingToken, email, devOtp } = location.state || {};
+  const [otp, setOtp] = useState(devOtp || "");
+  const [status, setStatus] = useState(
+    devOtp ? { type: "info", message: `Your verification code is: ${devOtp}` } : null
+  );
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const timerRef = useRef(null);
@@ -52,6 +54,7 @@ export default function OtpVerification() {
     setSubmitting(true);
     const result = await resendLoginOtp(pendingToken);
     setSubmitting(false);
+    if (result.devOtp) setOtp(result.devOtp);
     setStatus({ type: result.ok ? "success" : "error", message: result.message });
     if (result.ok) setCooldown(RESEND_COOLDOWN_SECONDS);
   };
