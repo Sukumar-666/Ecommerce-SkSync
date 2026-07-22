@@ -109,6 +109,9 @@ exports.signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 12);
     const rawToken = generateRawToken();
 
+    const hasSmtp = Boolean(process.env.SMTP_HOST);
+    const autoVerify = !hasSmtp || process.env.AUTO_VERIFY === "true";
+
     const user = await User.create({
       name,
       email: email.toLowerCase(),
@@ -116,15 +119,19 @@ exports.signup = async (req, res) => {
       password: hashedPassword,
       gender,
       role: "customer",
-      isEmailVerified: false,
+      isEmailVerified: autoVerify,
       emailVerificationTokenHash: hashValue(rawToken),
       emailVerificationExpires: new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS)
     });
 
-    await sendVerificationEmail(user, rawToken);
+    if (hasSmtp) {
+      await sendVerificationEmail(user, rawToken);
+    }
 
     res.status(201).json({
-      message: "Account created. Please check your email to verify your account before logging in."
+      message: autoVerify
+        ? "Account created successfully. You can now log in."
+        : "Account created. Please check your email to verify your account before logging in."
     });
   } catch (err) {
     res.status(500).json({ message: "Signup failed.", error: err.message });
@@ -161,8 +168,6 @@ exports.resendVerification = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email: (email || "").toLowerCase() });
 
-    // Same response whether or not the account exists — avoids leaking which
-    // emails are registered.
     const genericResponse = { message: "If an account exists for that email, a new verification link has been sent." };
 
     if (!user || user.isEmailVerified) return res.json(genericResponse);
@@ -172,7 +177,9 @@ exports.resendVerification = async (req, res) => {
     user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_EXPIRES_MS);
     await user.save();
 
-    await sendVerificationEmail(user, rawToken);
+    if (process.env.SMTP_HOST) {
+      await sendVerificationEmail(user, rawToken);
+    }
     res.json(genericResponse);
   } catch (err) {
     res.status(500).json({ message: "Could not resend verification email.", error: err.message });
@@ -213,11 +220,17 @@ exports.login = async (req, res) => {
       });
     }
 
+    const hasSmtp = Boolean(process.env.SMTP_HOST);
     if (!user.isEmailVerified) {
-      return res.status(403).json({
-        message: "Please verify your email before logging in.",
-        code: "EMAIL_NOT_VERIFIED"
-      });
+      if (hasSmtp && process.env.AUTO_VERIFY !== "true") {
+        return res.status(403).json({
+          message: "Please verify your email before logging in.",
+          code: "EMAIL_NOT_VERIFIED"
+        });
+      }
+      // If SMTP is not configured or AUTO_VERIFY=true, auto-verify account
+      user.isEmailVerified = true;
+      await user.save();
     }
 
     const otp = generateOtp();
@@ -230,9 +243,12 @@ exports.login = async (req, res) => {
     await sendOtpEmail(user, otp);
 
     res.json({
-      message: "A verification code has been sent to your email.",
+      message: hasSmtp
+        ? "A verification code has been sent to your email."
+        : `SMTP not set. Your OTP code is: ${otp}`,
       otpRequired: true,
-      pendingToken: signPendingTicket(user)
+      pendingToken: signPendingTicket(user),
+      ...(hasSmtp ? {} : { devOtp: otp })
     });
   } catch (err) {
     res.status(500).json({ message: "Login failed.", error: err.message });
