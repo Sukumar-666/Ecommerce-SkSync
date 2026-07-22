@@ -16,6 +16,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy headers on platforms behind reverse proxies like Render
+app.set("trust proxy", 1);
+
 // --- Security headers ---
 app.use(helmet());
 
