@@ -10,7 +10,7 @@ async function seed() {
   const adminEmail = "admin@gmail.com";
   const hashedPassword = await bcrypt.hash("admin@123", 12);
   const existingAdmin = await User.findOne({ email: adminEmail });
-  if (existingAdmin) {
+  if (existingAdmin) {  
     existingAdmin.password = hashedPassword;
     existingAdmin.role = "admin";
     existingAdmin.isEmailVerified = true;
