@@ -20,9 +20,9 @@ async function seed() {
     console.log(`Admin account updated: ${adminEmail} / Admin@123 (verified admin)`);
   } else {
     await User.create({
-      name: "Site Admin",
+      name: "SkSync Admin",
       email: adminEmail,
-      mobile: "9999999999",
+      mobile: "8248041642",
       password: hashedPassword,
       role: "admin",
       gender: "male",
