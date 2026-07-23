@@ -4,20 +4,18 @@ const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const User = require("./models/User");
 const Product = require("./models/Product");
-
 async function seed() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log("Connected to MongoDB");
-
-  const adminEmail = "sukumar1@gmail.com";
-  const hashedPassword = await bcrypt.hash("Admin@123", 12);
+  const adminEmail = "admin@gmail.com";
+  const hashedPassword = await bcrypt.hash("admin@123", 12);
   const existingAdmin = await User.findOne({ email: adminEmail });
   if (existingAdmin) {
     existingAdmin.password = hashedPassword;
     existingAdmin.role = "admin";
     existingAdmin.isEmailVerified = true;
     await existingAdmin.save();
-    console.log(`Admin account updated: ${adminEmail} / Admin@123 (verified admin)`);
+    console.log(`Admin account updated: ${adminEmail} / admin@123 (verified admin)`);
   } else {
     await User.create({
       name: "SkSync Admin",
@@ -30,7 +28,6 @@ async function seed() {
     });
     console.log(`Admin account created: ${adminEmail} / Admin@123 (verified admin)`);
   }
-
   try {
     await Product.collection.dropIndex("slug_1");
   } catch {}
@@ -60,7 +57,6 @@ async function seed() {
   await mongoose.disconnect();
   console.log("Done.");
 }
-
 seed().catch((err) => {
   console.error("Seed failed:", err);
   process.exit(1);
